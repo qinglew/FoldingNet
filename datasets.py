@@ -100,7 +100,7 @@ class ShapeNetPartDataset(data.Dataset):
         return len(self.datapath)
 
 
-class ModelNet40v2(data.Dataset):
+class ModelNet40(data.Dataset):
     def __init__(self, root, npoints=1024, split='train', normalize=True, data_augmentation=True):
         self.root = root
         self.npoints = npoints
@@ -166,8 +166,8 @@ if __name__ == '__main__':
     print(pc.size(), seg.size())
 
     modelnet_path = '/home/rico/Workspace/Dataset/modelnet/modelnet40_hdf5_2048'
-    train_dataset = ModelNet40v2(root=modelnet_path, split='train', data_augmentation=False, npoints=2048)
-    test_dataset = ModelNet40v2(root=modelnet_path, split='test', data_augmentation=False, npoints=2048)
+    train_dataset = ModelNet40(root=modelnet_path, split='train', data_augmentation=False, npoints=2048)
+    test_dataset = ModelNet40(root=modelnet_path, split='test', data_augmentation=False, npoints=2048)
     
     print("\033[32mModelNet40\033[0m: {} training data and {} testing data".format(len(train_dataset), len(test_dataset)))
     
