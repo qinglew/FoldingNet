@@ -1,4 +1,6 @@
 import argparse
+import os
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -18,6 +20,7 @@ parser.add_argument('--lr', type=float, default=1e-4)
 parser.add_argument('--weight_decay', type=float, default=1e-6)
 parser.add_argument('--epochs', type=int, default=400)
 parser.add_argument('--num_workers', type=int, default=4)
+parser.add_argument('--log_dir', type=str, default='./log')
 args = parser.parse_args()
 
 
@@ -42,6 +45,7 @@ optimizer = optim.Adam(autoendocer.parameters(), lr=args.lr, betas=[0.9, 0.999],
 batches = int(len(train_dataloader) / args.batch_size + 0.5)
 
 min_cd_loss = 1e3
+best_epoch = -1
 
 # begin training
 for epoch in range(1, args.epochs + 1):
@@ -59,7 +63,7 @@ for epoch in range(1, args.epochs + 1):
         optimizer.step()
 
         if (i + 1) % 100 == 0:
-            print('Epoch {}/{} with iteration {}/{}: CD loss is {}.'.format(epoch + 1, args.epochs, i + 1, batches, ls.item() / len(point_clouds)))
+            print('Epoch {}/{} with iteration {}/{}: CD loss is {}.'.format(epoch, args.epochs, i + 1, batches, ls.item() / len(point_clouds)))
     
     # evaluation
     autoendocer.eval()
@@ -72,8 +76,18 @@ for epoch in range(1, args.epochs + 1):
             ls = cd_loss(point_clouds, recons)
             total_cd_loss += ls.item()
     
+    # calculate the mean cd loss
     mean_cd_loss = total_cd_loss / len(test_dataset)
+
+    # records the best model and epoch
     if mean_cd_loss < min_cd_loss:
         min_cd_loss = mean_cd_loss
+        best_epoch = epoch
+        torch.save(autoendocer.state_dict(), os.path.join(args.log_dir, 'model_lowest_cd_loss.pth'))
+    
+    # save the model every 100 epochs
+    if (epoch) % 100 == 0:
+        torch.save(autoendocer.state_dict(), os.path.join(args.log_dir, 'model_epoch_{}.pth'.format(epoch)))
 
-    print('\033[32mEpoch {}/{}: reconstructed Chamfer Distance is {}. Minimum cd loss is {}.\033[0m'.format(epoch + 1, args.epochs, mean_cd_loss, min_cd_loss))
+    print('\033[32mEpoch {}/{}: reconstructed Chamfer Distance is {}. Minimum cd loss is {} in epoch {}.\033[0m'.format(
+        epoch, args.epochs, mean_cd_loss, min_cd_loss, best_epoch))
