@@ -2,9 +2,7 @@ import argparse
 import os
 import time
 
-import numpy as np
 import torch
-import torch.nn as nn
 import torch.optim as optim
 
 from datasets import ShapeNetPartDataset
@@ -16,7 +14,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--root', type=str, default='/home/rico/Workspace/Dataset/shapenet_part/shapenetcore_partanno_segmentation_benchmark_v0')
 parser.add_argument('--npoints', type=int, default=2048)
 parser.add_argument('--mpoints', type=int, default=2025)
-parser.add_argument('--batch_size', type=int, default=32)
+parser.add_argument('--batch_size', type=int, default=16)
 parser.add_argument('--lr', type=float, default=1e-4)
 parser.add_argument('--weight_decay', type=float, default=1e-6)
 parser.add_argument('--epochs', type=int, default=400)
@@ -97,4 +95,4 @@ for epoch in range(1, args.epochs + 1):
 
     print('\033[32mEpoch {}/{}: reconstructed Chamfer Distance is {}. Minimum cd loss is {} in epoch {}.\033[0m'.format(
         epoch, args.epochs, mean_cd_loss, min_cd_loss, best_epoch))
-    print('\033[31mCost {} minutes, {} seconds\033[0m'.format((cost) / 60, (cost) % 60))
+    print('\033[31mCost {} minutes and {} seconds\033[0m'.format(int(cost // 60), int(cost % 60)))

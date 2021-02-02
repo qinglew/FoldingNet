@@ -8,3 +8,7 @@ This is an implementation for FoldingNet in PyTorch. FoldingNet is a autoencoder
 * Python 3.8
 * CUDA 10.1
 * PyTorch 1.7.1
+
+## TODO
+
+When train the model with the chamfer distance with the given code, `nan` appeared. I'm looking for a good implementation for the extend chamfer distance.
