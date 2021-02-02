@@ -97,4 +97,4 @@ for epoch in range(1, args.epochs + 1):
 
     print('\033[32mEpoch {}/{}: reconstructed Chamfer Distance is {}. Minimum cd loss is {} in epoch {}.\033[0m'.format(
         epoch, args.epochs, mean_cd_loss, min_cd_loss, best_epoch))
-    print('\033[31mCost {} minutes, {} seconds\033[0m'.format((cost - start) / 60, (cost - start) % 60))
+    print('\033[31mCost {} minutes, {} seconds\033[0m'.format((cost) / 60, (cost) % 60))
