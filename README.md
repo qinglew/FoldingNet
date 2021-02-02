@@ -8,5 +8,3 @@ This is an implementation for FoldingNet in PyTorch. FoldingNet is a autoencoder
 * Python 3.8
 * CUDA 10.1
 * PyTorch 1.7.1
-
-I just finish coding for the network. I didn't write code for loading data and training model.
