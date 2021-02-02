@@ -29,7 +29,7 @@ args = parser.parse_args()
 train_dataset = ShapeNetPartDataset(root=args.root, npoints=args.npoints, split='train', classification=False, data_augmentation=True)
 test_dataset = ShapeNetPartDataset(root=args.root, npoints=args.npoints, split='test', classification=False, data_augmentation=True)
 train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
-test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
 
 # device
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -97,4 +97,4 @@ for epoch in range(1, args.epochs + 1):
 
     print('\033[32mEpoch {}/{}: reconstructed Chamfer Distance is {}. Minimum cd loss is {} in epoch {}.\033[0m'.format(
         epoch, args.epochs, mean_cd_loss, min_cd_loss, best_epoch))
-    print('\033[31mCost {} minutes, {} seconds\033[0m'.format((cost - start) / 60), (cost - start) % 60)
+    print('\033[31mCost {} minutes, {} seconds\033[0m'.format((cost - start) / 60, (cost - start) % 60))
