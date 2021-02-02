@@ -123,7 +123,7 @@ class Decoder(nn.Module):
     Decoder Module of FoldingNet
     """
 
-    def __init__(self, in_channel):
+    def __init__(self, in_channel=512):
         super(Decoder, self).__init__()
 
         # Sample the grids in 2D space
@@ -159,6 +159,19 @@ class Decoder(nn.Module):
         return recon2
 
 
+class AutoEncoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.encoder = Encoder()
+        self.decoder = Decoder()
+
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
+
+
 if __name__ == '__main__':
     pcs = torch.randn(32, 3, 2048)
 
@@ -169,3 +182,7 @@ if __name__ == '__main__':
     decoder = Decoder(codewords.size(1))
     recons = decoder(codewords)
     print(recons.size())
+
+    ae = AutoEncoder()
+    y = ae(pcs)
+    print(y.size())
