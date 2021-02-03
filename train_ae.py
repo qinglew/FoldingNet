@@ -7,7 +7,7 @@ import torch.optim as optim
 
 from datasets import ShapeNetPartDataset
 from model import AutoEncoder
-from loss import ChamferDistance
+from chamfer_distance.chamfer_distance import ChamferDistance
 
 
 parser = argparse.ArgumentParser()

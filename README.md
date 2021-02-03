@@ -9,6 +9,10 @@ This is an implementation for FoldingNet in PyTorch. FoldingNet is a autoencoder
 * CUDA 10.1
 * PyTorch 1.7.1
 
-## TODO
+## Reconstruction
 
-When train the model with the chamfer distance with the given code, `nan` appeared. I'm looking for a good implementation for the extend chamfer distance.
+In order to train the model to do the reconstruction, use the command:
+
+```bash
+python train_ae.py --batch_size <batch_size> --epochs <epochs> --lr <lr> --weight_decay <weight_decay> --num_workers <num_workers>
+```
