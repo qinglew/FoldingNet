@@ -2,6 +2,20 @@ import random
 
 import numpy as np
 import torch
+import matplotlib.pyplot as plt 
+from mpl_toolkits.mplot3d import Axes3D
+
+
+def show_point_cloud(point_cloud, axis=False):
+    """visual a point cloud
+    Args:
+        point_cloud (np.ndarray): the coordinates of point cloud
+        axis (bool, optional): Hid the coordinate of the matplotlib. Defaults to False.
+    """
+    ax = plt.figure().add_subplot(projection='3d')
+    ax._axis3don = axis
+    ax.scatter(xs=point_cloud[:, 0], ys=point_cloud[:, 1], zs=point_cloud[:, 2], s=5)
+    plt.show()
 
 
 def setup_seed(seed):

@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 
 from torch.utils.cpp_extension import load
+
+
 cd = load(name="cd",
           sources=["chamfer_distance/chamfer_distance.cpp",
                    "chamfer_distance/chamfer_distance.cu"])
@@ -53,6 +55,9 @@ class ChamferDistanceFunction(torch.autograd.Function):
 
 
 class ChamferDistance(nn.Module):
+    def __init__(self):
+        super().__init__()
+    
     def forward(self, xyz1, xyz2):
         """
         Args:
