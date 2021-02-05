@@ -71,6 +71,20 @@ def knn(x, k):
     return idx
 
 
+def to_one_hots(y, categories):
+    """
+    Encode the labels into one-hot coding.
+
+    :param y: labels for a batch data with size (B,)
+    :param categories: total number of kinds for the label in the dataset
+    :return: (B, categories)
+    """
+    y_ = torch.eye(categories)[y.data.cpu().numpy()]
+    if y.is_cuda:
+        y_ = y_.cuda()
+    return y_
+
+
 if __name__ == '__main__':
     pcs = torch.rand(32, 3, 1024)
     knn_index = knn(pcs, 16)

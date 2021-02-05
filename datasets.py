@@ -150,6 +150,9 @@ class ModelNet40(data.Dataset):
             rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
             point_cloud[:, [0, 2]] = point_cloud[:, [0, 2]].dot(rotation_matrix)  # random rotation
             point_cloud += np.random.normal(0, 0.02, size=point_cloud.shape)  # random jitter
+        
+        point_cloud = torch.from_numpy(point_cloud)
+        label = torch.from_numpy(label)
 
         return point_cloud, label, classname
 
