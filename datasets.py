@@ -25,7 +25,7 @@ class ShapeNetPartDataset(data.Dataset):
                 self.cat2id[ls[0]] = ls[1]
 
         # parse segment num file.
-        with open('num_seg_classes.txt', 'r') as f:
+        with open('misc/num_seg_classes.txt', 'r') as f:
             for line in f:
                 ls = line.strip().split()
                 self.seg_classes[ls[0]] = int(ls[1])
@@ -110,7 +110,7 @@ class ModelNet40(data.Dataset):
         self.cat2id = {}
 
         # load classname and class id
-        with open('modelnet40category2id.txt', 'r') as f:
+        with open('misc/modelnet40category2id.txt', 'r') as f:
             for line in f:
                 ls = line.strip().split()
                 self.cat2id[ls[0]] = int(ls[1])

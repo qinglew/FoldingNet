@@ -17,19 +17,8 @@ In order to train the model to do the reconstruction, use the command:
 python train_ae.py --batch_size <batch_size> --epochs <epochs> --lr <lr> --weight_decay <weight_decay> --num_workers <num_workers>
 ```
 
+In order to evaluate the model, see the `evaluation_ae.py`
+
 ## Examples
 
-<img src="images/airplane_gt.png" width="350"/>
-<img src="images/airplane_rc.png" width="350"/>
-
-<img src="images/chair_gt.png" width="350"/>
-<img src="images/chair_rc.png" width="350"/>
-
-<img src="images/chair1_gt.png" width="350"/>
-<img src="images/chair1_rc.png" width="350"/>
-
-<img src="images/lamp_gt.png" width="350"/>
-<img src="images/lamp_rc.png" width="350"/>
-
-<img src="images/table_gt.png" width="350"/>
-<img src="images/table_rc.png" width="350"/>
+![Examples](misc/examples.png)

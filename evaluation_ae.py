@@ -29,4 +29,4 @@ with torch.no_grad():
 
 # calculate the mean cd loss
 mean_cd_loss = total_cd_loss / len(test_dataset)
-print(mean_cd_loss)
+print('Mean Chamfer Distance of all Point Clouds:', mean_cd_loss)
