@@ -9,7 +9,7 @@ This is an implementation for FoldingNet in PyTorch. FoldingNet is a autoencoder
 * CUDA 10.1.243
 * PyTorch 1.7.0
 
-## Reconstruction
+## Reconstruction on ShapeNet
 
 In order to train the model to do the reconstruction, use the command:
 
@@ -19,15 +19,15 @@ python train_ae.py --batch_size <batch_size> --epochs <epochs> --lr <lr> --weigh
 
 In order to evaluate the model, see the `evaluation_ae.py`
 
-## Classification
+## Transfer Classification on ModelNet40
 
-Accuracy Overall: 79.82%
+I train the AutoEncoder on ShapeNet and use the encoder to extract the features of point clouds of training set of ModelNet40. I train a SVM on the features extracted from ModelNet40's training dataset and evaluate the svm on the testing dataset of ModelNet40.
 
-Precision: 92.42%
-
-Recall: 81.08%
-
-F1-Score: 86.38%
+Accuracy Overall | 79.82%
+-- | --
+Precision | 92.42%
+Recall | 81.08%
+F1-Score | 86.38%
 
 category | precision | recall | f1-score | support
 -- | -- | -- | -- | --
