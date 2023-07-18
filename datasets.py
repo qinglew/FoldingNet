@@ -158,6 +158,80 @@ class ModelNet40(data.Dataset):
 
     def __len__(self):
         return len(self.pcs)
+    
+class ShapeNetCorePointClouds(data.Dataset):
+    def __init__(
+            self, 
+            root, 
+            npoints=1024, 
+            split='train', 
+            normalize=True, 
+            data_augmentation=True,
+            sample_npoints=True
+    ):
+        self.root = root
+        self.npoints = npoints
+        self.split = split
+        self.normalize = normalize
+        self.data_augmentation = data_augmentation
+        self.cat2id = {}
+        self.sample_npoints = sample_npoints
+
+        # load classname and class id
+        with open(os.path.join(self.root, "synsetID_to_category_shapenetcore.json"), 'r') as f:
+            self.id2cat = json.load(f)
+        self.cat2id = {v: k for k, v in self.id2cat.items()}
+
+        # find all .h5 files
+        data_files = [file_name for file_name in os.listdir(self.root) if self.split in file_name]
+        data_paths = [os.path.join(self.root, file) for file in data_files]
+
+        # load data from .h5 files
+        point_clouds, labels, synsetIds = [], [], []
+        for data_path in data_paths:
+            with h5py.File(data_path, 'r') as data_file:
+                point_clouds.append(np.array(data_file['point_clouds']))
+                # labels.append(np.array(data_file['categories']))
+        self.pcs = np.concatenate(point_clouds, axis=0)
+        # self.lbs = np.concatenate(labels, axis=0)
+    
+    def __getitem__(self, index):
+        point_cloud = self.pcs[index]
+        # label = self.lbs[index]
+        # label[0] = label[0].decode("utf-8")
+        # classname = [self.cat2id[label[0].decode("utf-8")]]
+
+        if self.sample_npoints:
+            choice = np.empty((self.npoints, point_cloud.shape[-1]))
+            # select self.npoints from the original point cloud
+            if self.split == 'train': # random choice to increase data diversity
+                choice = np.random.choice(len(point_cloud), self.npoints, replace=True)
+            if self.split == 'test': # deterministic choice: validation/test set must remain equal to itself at each evaluation step
+                np.random.seed(1234)
+                choice = np.random.choice(len(point_cloud), self.npoints, replace=False)
+            point_cloud = point_cloud[choice, :]
+
+        # normalize into a sphere whose radius is 1
+        if self.normalize:
+            point_cloud = point_cloud - np.mean(point_cloud, axis=0)
+            dist = np.max(np.sqrt(np.sum(point_cloud  ** 2, axis=1)))
+            point_cloud = point_cloud / dist
+
+        # data augmentation - random rotation and random jitter
+        if self.data_augmentation:
+            theta = np.random.uniform(0, np.pi * 2)
+            rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+            point_cloud[:, [0, 2]] = point_cloud[:, [0, 2]].dot(rotation_matrix)  # random rotation
+            point_cloud += np.random.normal(0, 0.02, size=point_cloud.shape)  # random jitter
+        
+        point_cloud = torch.from_numpy(point_cloud)
+        # label = torch.from_numpy(label)
+
+        # return point_cloud, label, classname
+        return point_cloud
+
+    def __len__(self):
+        return len(self.pcs)
 
 
 if __name__ == '__main__':
