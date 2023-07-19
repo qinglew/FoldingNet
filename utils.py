@@ -1,11 +1,11 @@
 import random
-
 import numpy as np
 import torch
 import matplotlib.pyplot as plt 
 from mpl_toolkits.mplot3d import Axes3D
 
 
+#-------------------------------------------------------------------------------------------
 def show_point_cloud(point_cloud, axis=False):
     """visual a point cloud
     Args:
@@ -16,8 +16,11 @@ def show_point_cloud(point_cloud, axis=False):
     ax._axis3don = axis
     ax.scatter(xs=point_cloud[:, 0], ys=point_cloud[:, 1], zs=point_cloud[:, 2], s=5)
     plt.show()
+#-------------------------------------------------------------------------------------------
 
 
+
+#-------------------------------------------------------------------------------------------
 def setup_seed(seed):
     """
     Set the random seed.
@@ -27,15 +30,21 @@ def setup_seed(seed):
     np.random.seed(seed)
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
+#-------------------------------------------------------------------------------------------
 
 
+
+#-------------------------------------------------------------------------------------------
 def index_points(point_clouds, index):
     """
     Given a batch of tensor and index, select sub-tensor.
 
-    Input:
-        points: input points data, [B, N, C]
-        idx: sample index data, [B, N, k]
+    Parameters:
+    -----------
+        points: (torch.Tensor)
+            Input points data, [B, N, C]
+        idx: (torch.Tensor)
+            Sample index data, [B, N, k]
     Return:
         new_points:, indexed points data, [B, N, k, C]
     """
@@ -48,8 +57,11 @@ def index_points(point_clouds, index):
     batch_indices = torch.arange(batch_size, dtype=torch.long, device=device).view(view_shape).repeat(repeat_shape)
     new_points = point_clouds[batch_indices, index, :]
     return new_points
+#-------------------------------------------------------------------------------------------
 
 
+
+#-------------------------------------------------------------------------------------------
 def knn(x, k):
     """
     K nearest neighborhood.
@@ -69,8 +81,11 @@ def knn(x, k):
  
     idx = pairwise_distance.topk(k=k, dim=-1)[1]   # (B, N, k)
     return idx
+#-------------------------------------------------------------------------------------------
 
 
+
+#-------------------------------------------------------------------------------------------
 def to_one_hots(y, categories):
     """
     Encode the labels into one-hot coding.
@@ -83,6 +98,8 @@ def to_one_hots(y, categories):
     if y.is_cuda:
         y_ = y_.cuda()
     return y_
+#-------------------------------------------------------------------------------------------
+
 
 
 if __name__ == '__main__':
