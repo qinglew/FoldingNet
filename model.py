@@ -3,7 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
 import numpy as np
-from typing import Optional, List, Union, Iterable
+from typing import (
+    Optional, List, Union, Iterable, Literal, Tuple
+)
 from utils import index_points, knn
 from chamfer_distance.chamfer_distance import ChamferDistance
 
@@ -294,17 +296,19 @@ class AutoEncoder(pl.LightningModule):
     '''
     def __init__(
             self, 
+            dataset_name: Literal['ModelNet40', 'ShapeNetCore'],
             lr: Optional[float] = 1e-4, 
             betas: Optional[List[float]] = [0.9, 0.99], 
             weight_decay: Optional[float] = 1e-6, 
             npoints: Optional[int] = 2048, 
             mpoints: Optional[int] = 2025, 
             epochs: Optional[int] = 1000, 
-            # dataset_name="ShapeNetCore_v2"
         ):
         '''
         Parameters:
         -----------
+        dataset_name:
+        dataset_name: (Literal['ModelNet40', 'ShapeNetCore'])
             lr: (Optional[float] = 1e-4)
             betas: (Optional[List[float]] = [0.9, 0.99])
             weight_decay: (Optional[float] = 1e-6)
@@ -328,17 +332,17 @@ class AutoEncoder(pl.LightningModule):
         self.npoints = npoints, 
         self.mpoints = mpoints
         self.epochs = epochs,
-        # self.dataset = dataset_name
+        self.dataset = dataset_name
 
 
     def forward(
             self, 
-            x: torch.Tensor
+            x: Union[torch.Tensor, Tuple(torch.Tensor, torch.Tensor)]
         ):
         '''
         Parameters:
         -----------
-            x: (torch.Tensor)
+            x: Union[torch.Tensor, Tuple(torch.Tensor, torch.Tensor)]
                 Tensor of size (B, 3, N)
 
         Returns:
@@ -346,6 +350,8 @@ class AutoEncoder(pl.LightningModule):
             x: (torch.Tensor)
                 Tensor of size (B, 3, M)
         '''
+        if isinstance(x, tuple):
+            x = x[0]
         x = self.encoder(x)
         x = self.decoder(x)
         return x
@@ -364,7 +370,7 @@ class AutoEncoder(pl.LightningModule):
                 and additional items (e.g., a label associated to the point cloud)
         '''
 
-        if (type(train_batch) == list) or (type(train_batch) == tuple):
+        if isinstance(train_batch, tuple):
             x = train_batch[0]
         else:
             x = train_batch

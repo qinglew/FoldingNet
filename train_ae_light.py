@@ -1,18 +1,13 @@
 import argparse
-import os
-import time
-import torch
-import torch.optim as optim
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 from datasets import (
-    ModelNet40, 
-    ShapeNetCorePointsClouds_v2
+    ModelNet40_train,
+    ModelNet40_test, 
+    ShapeNetCore_train,
+    ShapeNetCore_test
 )
-from model import (
-    AutoEncoderLight, 
-    AutoEncoder
-)
+from model import AutoEncoder
 from train_utils import get_args
 
 # Read config file
@@ -22,66 +17,68 @@ path_to_config = parser.parse_args()
 args = get_args(path_to_config)
 
 if "Shape" in args.root:
-    dataset_name = "ShapeNetCore_v2"
+    dataset_name = "ShapeNetCore"
 elif "Model" in args.root:
     dataset_name = "ModelNet40"
 
+
 # Create the model
-ae = AutoEncoderLight(
+ae = AutoEncoder(
+    dataset_name=dataset_name,
     lr=args.lr,
     betas=[args.beta1, args.beta2],
     weight_decay=args.weight_decay,
     npoints=args.npoints,
     mpoints=args.mpoints,
     epochs=args.epochs,
-    dataset_name=dataset_name
 )
 
-# prepare training and testing dataset
-# train_dataset = ShapeNetPartDataset(root=args.root, npoints=args.npoints, split='train', classification=False, data_augmentation=True)
-# test_dataset = ShapeNetPartDataset(root=args.root, npoints=args.npoints, split='test', classification=False, data_augmentation=True)
 
 print("Loading training dataset ...")
 if "Shape" in args.root:
-    train_dataset = ShapeNetCorePointsClouds_v2(
+    train_dataset = ShapeNetCore_train(
         root=args.root,
         npoints=args.npoints,
-        split="train",
         normalize=True,
-        data_augmentation=True,
-        sample_npoints=True
+        data_augmentation=True
     )
 if "Model" in args.root:
-    train_dataset = ModelNet40(
+    train_dataset = ModelNet40_train(
         root=args.root, 
-        npoints=args.npoints, 
-        split='train', 
+        npoints=args.npoints,  
         normalize=True, 
         data_augmentation=True
     )
 
 print("Loading validation dataset ...")
 if "Shape" in args.root:
-    val_dataset = ShapeNetCorePointsClouds_v2(
+    val_dataset = ShapeNetCore_test(
         root=args.root,
         npoints=args.npoints,
         split="val",
-        normalize=True,
-        data_augmentation=False,
-        sample_npoints=False
+        normalize=True
     )
 if "Model" in args.root:
-    val_dataset = ModelNet40(
+    val_dataset = ModelNet40_test(
         root=args.root, 
         npoints=args.npoints, 
-        split='test', 
-        normalize=True, 
-        data_augmentation=False
+        split='val', 
+        normalize=True
     )
 
 print("Creating data loaders ...")
-train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
-val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
+train_loader = DataLoader(
+    train_dataset, 
+    batch_size=args.batch_size, 
+    shuffle=True, 
+    num_workers=args.num_workers
+)
+val_loader = DataLoader(
+    val_dataset, 
+    batch_size=args.batch_size, 
+    shuffle=False, 
+    num_workers=args.num_workers
+)
 
 print("Number of training data: {}".format(len(train_dataset)))
 print("Number of validation data: {}".format(len(val_dataset)))

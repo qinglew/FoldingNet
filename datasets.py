@@ -176,7 +176,7 @@ class ModelNet40_train(data.Dataset):
     def __getitem__(self, index):
         point_cloud = self.point_clouds[index]
         label = self.lbs[index]
-        classname = self.id2cat[label[0]]
+        # classname = self.id2cat[label[0]]
 
         # select self.npoints from the original point cloud randomly
         choice = np.random.choice(len(point_cloud), self.npoints, replace=False)
@@ -198,7 +198,7 @@ class ModelNet40_train(data.Dataset):
         point_cloud = torch.from_numpy(point_cloud)
         label = torch.from_numpy(label)
 
-        return point_cloud, label, classname
+        return point_cloud, label
 
     def __len__(self):
         return len(self.pcs)
@@ -272,7 +272,7 @@ class ModelNet40_test(data.Dataset):
     def __getitem__(self, index):
         point_cloud = self.point_clouds[index]
         label = self.lbs[index]
-        classname = self.id2cat[label[0]]
+        # classname = self.id2cat[label[0]]
 
         # normalize into a sphere whose radius is 1
         if self.normalize:
@@ -283,7 +283,7 @@ class ModelNet40_test(data.Dataset):
         point_cloud = torch.from_numpy(point_cloud)
         label = torch.from_numpy(label)
 
-        return point_cloud, label, classname
+        return point_cloud, label
 
     def __len__(self):
         return len(self.pcs)
