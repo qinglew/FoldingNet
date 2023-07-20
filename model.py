@@ -24,16 +24,32 @@ Legend -> tensors dimensions:
 #--------------------------------------------------------------------------------
 class GraphLayer(pl.LightningModule):
     """
-    Graph layer.
-
-    in_channel: it depends on the input of this network.
-    out_channel: given by ourselves.
+    Graph layer that performs KNN maxpoling.
     """
-    def __init__(self, in_channel, out_channel, k=16):
+
+    def __init__(
+            self, 
+            in_channels: int, 
+            out_channels: int, 
+            k: Optional[int] = 16
+        ):
+        '''
+        Parameters:
+        -----------
+            in_channels: (int)
+                The number of input channels to the mapping layer after KNN maxpooling.
+
+            out_channels: (int)
+                The number of output channels to the mapping layer after KNN maxpooling.
+
+            k: (Optional[int], deafult = 16)
+                The number of neighbors considered to construct the KNN graph.
+        '''
+
         super().__init__()
         self.k = k
-        self.conv = nn.Conv1d(in_channel, out_channel, 1)
-        self.bn = nn.BatchNorm1d(out_channel)
+        self.conv = nn.Conv1d(in_channels, out_channels, 1)
+        self.bn = nn.BatchNorm1d(out_channels)
 
     def forward(self, x):
         """
@@ -47,6 +63,7 @@ class GraphLayer(pl.LightningModule):
             x: (torch.Tensor)
                 Tensor of size (B, C_out, N)
         """
+        
         # KNN
         knn_idx = knn(x, k=self.k)  # (B, N, k)
         knn_x = index_points(x.permute(0, 2, 1), knn_idx)  # (B, N, k, C)
@@ -56,6 +73,7 @@ class GraphLayer(pl.LightningModule):
         
         # Feature Map
         x = F.relu(self.bn(self.conv(x)))
+
         return x
 #-------------------------------------------------------------------------------
 
@@ -83,8 +101,8 @@ class Encoder(pl.LightningModule):
         self.conv4 = nn.Conv1d(1024, 512, 1)
         self.bn4 = nn.BatchNorm1d(512)
 
-        # self.conv4 = nn.Conv1d(512, 512, 1)
-        # self.bn4 = nn.BatchNorm1d(512)
+        # self.conv5 = nn.Conv1d(512, 512, 1)
+        # self.bn5 = nn.BatchNorm1d(512)
 
     def forward(self, x):
         b, c, n = x.size()
@@ -269,7 +287,7 @@ class Decoder(pl.LightningModule):
 
 
 
-#-------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------
 class AutoEncoder(pl.LightningModule):
     '''
     The end-to-end Autoencoder model FoldingNet
