@@ -8,6 +8,7 @@ from typing import (
 )
 from utils import index_points, knn
 from chamfer_distance.chamfer_distance import ChamferDistance
+from torch import optim
 
 
 """
@@ -237,10 +238,10 @@ class Decoder(pl.LightningModule):
         # Sample the grids in 2D space
         xx = np.linspace(-0.3, 0.3, int(np.sqrt(grid_size)), dtype=np.float32)
         yy = np.linspace(-0.3, 0.3, int(np.sqrt(grid_size)), dtype=np.float32)
-        self.grid = np.meshgrid(xx, yy)   # (2, sqrt(M), sqrt(M))
+        grid = np.meshgrid(xx, yy)   # (2, sqrt(M), sqrt(M))
 
         # Reshape grid
-        self.grid = torch.Tensor(self.grid).view(2, -1)  # (2, M)
+        self.grid = torch.Tensor(np.asarray(grid)).view(2, -1)  # (2, M)
         self.m = self.grid.shape[1]
 
         # Folding layers
@@ -337,12 +338,12 @@ class AutoEncoder(pl.LightningModule):
 
     def forward(
             self, 
-            x: Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]
+            input: Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]
         ):
         '''
         Parameters:
         -----------
-            x: Union[torch.Tensor, Tuple(torch.Tensor, torch.Tensor)]
+            input: Union[torch.Tensor, Tuple(torch.Tensor, torch.Tensor)]
                 Tensor of size (B, 3, N)
 
         Returns:
@@ -350,8 +351,9 @@ class AutoEncoder(pl.LightningModule):
             x: (torch.Tensor)
                 Tensor of size (B, 3, M)
         '''
-        if isinstance(x, tuple):
-            x = x[0]
+
+        # extract input (x point cloud, y label)
+        x, y = input
         x = self.encoder(x)
         x = self.decoder(x)
         return x
@@ -360,7 +362,7 @@ class AutoEncoder(pl.LightningModule):
     def training_step(
             self, 
             train_batch: Union[Iterable[torch.Tensor], torch.Tensor], 
-            # batch_idx: int
+            batch_idx: int
         ):
         '''
         Parameters:
@@ -370,11 +372,9 @@ class AutoEncoder(pl.LightningModule):
                 and additional items (e.g., a label associated to the point cloud)
         '''
 
-        if isinstance(train_batch, tuple):
-            x = train_batch[0]
-        else:
-            x = train_batch
-
+        # extract input (x point cloud, y label)
+        x, y = train_batch 
+        
         # input
         x = x.permute(0, 2, 1) # (B, 3, N)
         
@@ -397,7 +397,7 @@ class AutoEncoder(pl.LightningModule):
     def validation_step(
             self, 
             val_batch: Union[Iterable[torch.Tensor], torch.Tensor], 
-            # batch_idx: int
+            batch_idx: int
         ):
         '''
         Parameters:
@@ -407,10 +407,8 @@ class AutoEncoder(pl.LightningModule):
                 and additional items (e.g., a label associated to the point cloud)
         '''
 
-        if (type(val_batch) == list) or (type(val_batch) == tuple):
-            x = val_batch[0]
-        else:
-            x = val_batch
+        # extract input (x point cloud, y label)
+        x, y = val_batch 
         
         # input 
         x = x.permute(0, 2, 1)
@@ -438,7 +436,7 @@ class AutoEncoder(pl.LightningModule):
     def test_step(
             self, 
             test_batch: Union[Iterable[torch.Tensor], torch.Tensor], 
-            # batch_idx: int
+            batch_idx: int
         ):
         '''
         Parameters:
@@ -448,10 +446,8 @@ class AutoEncoder(pl.LightningModule):
                 and additional items (e.g., a label associated to the point cloud)
         '''
 
-        if (type(test_batch) == list) or (type(test_batch) == tuple):
-            x = test_batch[0]
-        else:
-            x = test_batch
+        # extract input (x point cloud, y label)
+        x, y = test_batch 
 
         # input 
         x = x.permute(0, 2, 1)
@@ -463,6 +459,25 @@ class AutoEncoder(pl.LightningModule):
         x_hat = self.decoder(z) # (B, 3, M)
         
         return self.cd_loss(x.permute(0, 2, 1), x_hat.permute(0, 2, 1))
+    
+
+    def configure_optimizers(self):
+        opt = optim.Adam(self.parameters(), 
+                         lr=self.lr, 
+                         betas=self.betas, 
+                         weight_decay=self.weight_decay)
+        return {
+            "optimizer": opt,
+            "lr_scheduler": {
+                "scheduler": optim.lr_scheduler.ReduceLROnPlateau(optimizer=opt, 
+                                                                  mode='min',
+                                                                  factor=0.5,
+                                                                  patience=20,
+                                                                  min_lr=1e-7),
+                "monitor": "val_loss",
+                "frequency": 1
+            },
+        }
 #-------------------------------------------------------------------------------
 
 

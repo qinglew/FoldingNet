@@ -201,7 +201,7 @@ class ModelNet40_train(data.Dataset):
         return point_cloud, label
 
     def __len__(self):
-        return len(self.pcs)
+        return len(self.point_clouds)
 #---------------------------------------------------------------------------------
 
 
@@ -260,12 +260,16 @@ class ModelNet40_test(data.Dataset):
         point_clouds, labels = [], []
         for filename in data_files:
             with h5py.File(filename, 'r') as data_file:
-                # resample current point cloud
-                pc = np.array(data_file['data'])
-                choice = np.random.choice(len(pc), self.npoints, replace=False)
-                pc = pc[choice, :]
-                point_clouds.append(pc)
+                pcs = np.array(data_file['data'])
+                
+                # resample current point cloud to take npoints from each
+                pcs = [
+                    pc[np.random.choice(len(pc), self.npoints, replace=False), :]
+                    for pc in pcs
+                ]
+                point_clouds.append(np.asarray(pcs))
                 labels.append(np.array(data_file['label']))
+
         self.point_clouds = np.concatenate(point_clouds, axis=0)
         self.lbs = np.concatenate(labels, axis=0)
     
@@ -286,7 +290,7 @@ class ModelNet40_test(data.Dataset):
         return point_cloud, label
 
     def __len__(self):
-        return len(self.pcs)
+        return len(self.point_clouds)
 #---------------------------------------------------------------------------------
 
 
@@ -378,7 +382,7 @@ class ShapeNetCore_train(data.Dataset):
         return point_cloud, label
 
     def __len__(self):
-        return len(self.pcs)
+        return len(self.point_clouds)
 #---------------------------------------------------------------------------------
 
 
@@ -434,12 +438,14 @@ class ShapeNetCore_test(data.Dataset):
         point_clouds, labels, synsetIds = [], [], []
         for data_path in data_paths:
             with h5py.File(data_path, 'r') as data_file:
-                # resample current point cloud
-                pc = np.array(data_file['data'])
-                choice = np.random.choice(len(pc), self.npoints, replace=False)
-                pc = pc[choice, :]
-                point_clouds.append(pc)
-                labels.append(np.array(data_file['categories']))
+                pcs = np.array(data_file['data'])
+                # resample current point cloud to take npoints from each
+                pcs = [
+                    pc[np.random.choice(len(pc), self.npoints, replace=False), :]
+                    for pc in pcs
+                ]
+                point_clouds.append(np.asarray(pcs))
+                labels.append(np.array(data_file['label']))
         self.point_clouds = np.concatenate(point_clouds, axis=0)
         self.labels = np.concatenate(labels, axis=0)
     
@@ -461,25 +467,25 @@ class ShapeNetCore_test(data.Dataset):
         return point_cloud, label
 
     def __len__(self):
-        return len(self.pcs)
+        return len(self.point_clouds)
 #---------------------------------------------------------------------------------
 
 
 
 
-# if __name__ == '__main__':
-    # shapenet_path = "/home/rico/Workspace/Dataset/shapenet_part/shapenetcore_partanno_segmentation_benchmark_v0"
-    # train_dataset = ShapeNetPartDataset(root=shapenet_path, classification=False, class_choice=None, npoints=2048, split='train')
-    # test_dataset = ShapeNetPartDataset( root=shapenet_path, classification=False, class_choice=None, npoints=2048, split='test')
-    # print("\033[32mShapeNet\033[0m: {} training data and {} testing data".format(len(train_dataset), len(test_dataset)))
-    # pc, seg = train_dataset[random.randint(0, len(train_dataset))]
-    # print(pc.size(), seg.size())
+if __name__ == '__main__':
+    shapenet_path = "/home/rico/Workspace/Dataset/shapenet_part/shapenetcore_partanno_segmentation_benchmark_v0"
+    train_dataset = ShapeNetPartDataset(root=shapenet_path, classification=False, class_choice=None, npoints=2048, split='train')
+    test_dataset = ShapeNetPartDataset( root=shapenet_path, classification=False, class_choice=None, npoints=2048, split='test')
+    print("\033[32mShapeNet\033[0m: {} training data and {} testing data".format(len(train_dataset), len(test_dataset)))
+    pc, seg = train_dataset[random.randint(0, len(train_dataset))]
+    print(pc.size(), seg.size())
 
-    # modelnet_path = '/home/rico/Workspace/Dataset/modelnet/modelnet40_hdf5_2048'
-    # train_dataset = ModelNet40(root=modelnet_path, split='train', data_augmentation=False, npoints=2048)
-    # test_dataset = ModelNet40(root=modelnet_path, split='test', data_augmentation=False, npoints=2048)
+    modelnet_path = '/home/rico/Workspace/Dataset/modelnet/modelnet40_hdf5_2048'
+    train_dataset = ModelNet40_train(root=modelnet_path, split='train', data_augmentation=False, npoints=2048)
+    test_dataset = ModelNet40_test(root=modelnet_path, split='test', data_augmentation=False, npoints=2048)
     
-    # print("\033[32mModelNet40\033[0m: {} training data and {} testing data".format(len(train_dataset), len(test_dataset)))
+    print("\033[32mModelNet40\033[0m: {} training data and {} testing data".format(len(train_dataset), len(test_dataset)))
     
-    # point_cloud, label, classname = train_dataset[random.randint(0, len(train_dataset))]
-    # print(point_cloud.shape, label.shape, classname, label)
+    point_cloud, label, classname = train_dataset[random.randint(0, len(train_dataset))]
+    print(point_cloud.shape, label.shape, classname, label)

@@ -1,5 +1,5 @@
 {
-    "root": "../ModelNet40_data/modelnet40_ply_hdf5_2048/",
+    "root": "../data/ModelNet40/modelnet40_ply_hdf5_2048/",
     "npoints": 1024,
     "mpoints": 1024,
     "batch_size": 16,

@@ -13,8 +13,8 @@ from train_utils import get_args
 # Read config file
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=str)
-path_to_config = parser.parse_args()
-args = get_args(path_to_config)
+cmd_line_args = parser.parse_args()
+args = get_args(cmd_line_args.config)
 
 if "Shape" in args.root:
     dataset_name = "ShapeNetCore"
@@ -62,7 +62,7 @@ if "Model" in args.root:
     val_dataset = ModelNet40_test(
         root=args.root, 
         npoints=args.npoints, 
-        split='val', 
+        split='test', 
         normalize=True
     )
 
