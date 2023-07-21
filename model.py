@@ -97,8 +97,8 @@ class Encoder(pl.LightningModule):
         self.bn2 = nn.BatchNorm1d(64)
         self.bn3 = nn.BatchNorm1d(64)
 
-        self.graph_layer1 = GraphLayer(in_channel=64, out_channel=128, k=16)
-        self.graph_layer2 = GraphLayer(in_channel=128, out_channel=1024, k=16)
+        self.graph_layer1 = GraphLayer(in_channels=64, out_channels=128, k=16)
+        self.graph_layer2 = GraphLayer(in_channels=128, out_channels=1024, k=16)
 
         self.conv4 = nn.Conv1d(1024, 512, 1)
         self.bn4 = nn.BatchNorm1d(512)
@@ -235,8 +235,8 @@ class Decoder(pl.LightningModule):
         super().__init__()
 
         # Sample the grids in 2D space
-        xx = np.linspace(-0.3, 0.3, np.sqrt(grid_size), dtype=np.float32)
-        yy = np.linspace(-0.3, 0.3, np.sqrt(grid_size), dtype=np.float32)
+        xx = np.linspace(-0.3, 0.3, int(np.sqrt(grid_size)), dtype=np.float32)
+        yy = np.linspace(-0.3, 0.3, int(np.sqrt(grid_size)), dtype=np.float32)
         self.grid = np.meshgrid(xx, yy)   # (2, sqrt(M), sqrt(M))
 
         # Reshape grid
@@ -337,7 +337,7 @@ class AutoEncoder(pl.LightningModule):
 
     def forward(
             self, 
-            x: Union[torch.Tensor, Tuple(torch.Tensor, torch.Tensor)]
+            x: Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]
         ):
         '''
         Parameters:
