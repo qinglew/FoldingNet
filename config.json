@@ -1,7 +1,7 @@
 {
     "root": "../data/ModelNet40/modelnet40_ply_hdf5_2048/",
-    "npoints": 1024,
-    "mpoints": 1024,
+    "npoints": 2048,
+    "mpoints": 2025,
     "batch_size": 16,
     "lr": 1e-4,
     "beta1": 0.9,
